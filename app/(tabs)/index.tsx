@@ -1,98 +1,130 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+// Emociones
+// Nota: Asegúrate de que las imágenes existan en assets/images/
+const EMOTIONS = [
+  { id: 'very-happy', icon: require('../../assets/images/very-happy.png'), label: 'Muy feliz' },
+  { id: 'happy', icon: require('../../assets/images/happy.png'), label: 'Feliz' },
+  { id: 'serious', icon: require('../../assets/images/serious.png'), label: 'Serio' },
+  { id: 'sad', icon: require('../../assets/images/sad.png'), label: 'Triste' },
+  { id: 'cry', icon: require('../../assets/images/cry.png'), label: 'Llorando' },
+];
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const handleContinue = () => {
+    if (!selectedEmotion) {
+      Alert.alert('Selección requerida', 'Por favor selecciona cómo te sientes hoy.');
+      return;
+    }
+    // Aquí se guardaría en el historial
+    console.log('Emoción seleccionada:', selectedEmotion);
+    Alert.alert('Registro exitoso', `Hoy te sientes: ${selectedEmotion}`);
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.title}>¿Cómo te sientes hoy?</Text>
+        
+        <View style={styles.emotionsContainer}>
+          {EMOTIONS.map((emotion) => (
+            <TouchableOpacity 
+              key={emotion.id} 
+              onPress={() => setSelectedEmotion(emotion.id)}
+              style={[
+                styles.emotionButton,
+                selectedEmotion === emotion.id && styles.emotionButtonSelected
+              ]}
+              activeOpacity={0.7}
+            >
+              <Image source={emotion.icon} style={styles.emotionIcon} resizeMode="contain" />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TouchableOpacity 
+          style={[styles.button, !selectedEmotion && styles.buttonDisabled]} 
+          onPress={handleContinue}
+          disabled={!selectedEmotion}
+        >
+          <Text style={styles.buttonText}>Continuar</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
+    paddingHorizontal: 24,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontFamily: 'Rufina-Bold',
+    fontSize: 40,
+    color: '#374151',
+    textAlign: 'center',
+    marginBottom: 60,
+    marginTop: -40, // Ajuste visual para subir un poco el título
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  emotionsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 20,
+    marginBottom: 80,
+    width: '100%',
+  },
+  emotionButton: {
+    padding: 10,
+    borderRadius: 50,
+    borderWidth: 3,
+    borderColor: 'transparent',
+    backgroundColor: '#F9FAFB', // Fondo sutil por defecto
+  },
+  emotionButtonSelected: {
+    borderColor: '#B898CA', // Color de selección
+    backgroundColor: '#F3E8FF',
+    transform: [{ scale: 1.1 }], // Pequeño efecto de escala
+  },
+  emotionIcon: {
+    width: 52,
+    height: 52,
+  },
+  button: {
+    backgroundColor: '#B898CA',
+    borderRadius: 12,
+    height: 56,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  buttonDisabled: {
+    backgroundColor: '#E5E7EB',
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  buttonText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: 18,
+    color: '#FFFFFF',
   },
 });
