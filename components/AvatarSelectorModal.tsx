@@ -1,17 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import {
-    Animated,
-    Dimensions,
-    FlatList,
-    Image,
-    ImageSourcePropType,
-    Modal,
-    PanResponder,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Animated,
+  Dimensions,
+  FlatList,
+  Image,
+  ImageSourcePropType,
+  Modal,
+  PanResponder,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 
 // Definimos las imágenes de los avatares
@@ -100,7 +100,15 @@ export default function AvatarSelectorModal({
           <Animated.View 
             style={[
               styles.modalContent,
-              { transform: [{ translateY: panY }] }
+              { 
+                transform: [{ 
+                  translateY: panY.interpolate({
+                    inputRange: [0, screenHeight],
+                    outputRange: [0, screenHeight],
+                    extrapolate: 'clamp',
+                  }) 
+                }] 
+              }
             ]}
             onStartShouldSetResponder={() => true}
             {...panResponder.panHandlers}

@@ -1,32 +1,26 @@
 import AvatarSelectorModal from '@/components/AvatarSelectorModal';
+import { useUser } from '@/context/UserContext';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Image,
-    ImageSourcePropType,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  ImageSourcePropType,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Definimos los tipos de navegación
-type RootStackParamList = {
-  login: undefined;
-  register: undefined;
-  '(tabs)': undefined; // Asumimos que 'Home' es el tab navigator
-};
-
 export default function RegisterScreen() {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const router = useRouter();
+  const { setName: setContextName, setAvatar: setContextAvatar } = useUser();
   
   // Estados para los campos
   const [name, setName] = useState('');
@@ -50,15 +44,19 @@ export default function RegisterScreen() {
       return;
     }
 
+    // Guardar en contexto
+    setContextName(name);
+    setContextAvatar(selectedAvatar);
+
     // Simulación de registro exitoso
     console.log('Registro exitoso:', { name, email, password, avatar: selectedAvatar });
     
-    // Navegar a la pantalla principal (Home/Tabs) reemplazando la actual para no volver al registro
-    navigation.replace('(tabs)');
+    // Navegar a la pantalla de estado emocional
+    router.replace('/emotional-checkin');
   };
 
   const handleLoginNavigation = () => {
-    navigation.navigate('login');
+    router.push('/login');
   };
 
   return (
