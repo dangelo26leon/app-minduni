@@ -44,6 +44,10 @@ export default function RootLayout() {
           <Stack.Screen name="emotional-checkin" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="profile" options={{ headerShown: false }} />
+          <Stack.Screen name="music-space" options={{ headerShown: false }} />
+          <Stack.Screen name="crisis-mode" options={{ headerShown: false }} />
+          <Stack.Screen name="journal" options={{ headerShown: false }} />
+          <Stack.Screen name="psychological-routines" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         </Stack>
         <StatusBar style="auto" />

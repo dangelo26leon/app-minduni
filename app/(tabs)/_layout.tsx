@@ -48,6 +48,7 @@ export default function TabLayout() {
         name="chat"
         options={{
           title: 'Chat',
+          tabBarStyle: { display: 'none' },
           tabBarIcon: ({ focused }) => (
             <View style={styles.chatButtonContainer}>
               <View style={styles.chatButtonCircle}>

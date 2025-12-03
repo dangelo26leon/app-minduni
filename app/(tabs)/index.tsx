@@ -2,13 +2,13 @@ import { useUser } from '@/context/UserContext';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Dimensions,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -150,6 +150,17 @@ export default function HomeScreen() {
                 key={tool.id} 
                 style={[styles.toolCard, { backgroundColor: tool.color }]}
                 activeOpacity={0.8}
+                onPress={() => {
+                  if (tool.id === 'musica') {
+                    router.push('/music-space');
+                  } else if (tool.id === 'crisis') {
+                    router.push('/crisis-mode');
+                  } else if (tool.id === 'diario') {
+                    router.push('/journal');
+                  } else if (tool.id === 'rutinas') {
+                    router.push('/psychological-routines');
+                  }
+                }}
               >
                 <View style={styles.toolContent}>
                   <View style={styles.toolHeader}>
