@@ -64,11 +64,12 @@ const TOOLS = [
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { name, avatar } = useUser();
+  const { user } = useUser();
   const [completedGoals, setCompletedGoals] = useState<string[]>([]);
 
   // Obtener solo el primer nombre
-  const firstName = name.split(' ')[0];
+  const firstName = user?.name ? user.name.split(' ')[0] : 'Usuario';
+  const userAvatar = user?.avatar || require('../../assets/images/avatar_4.png');
 
   const toggleGoal = (id: string) => {
     setCompletedGoals(prev => 
@@ -88,7 +89,7 @@ export default function HomeScreen() {
         </View>
         <View style={styles.navRight}>
           <TouchableOpacity onPress={() => router.push('/profile')}>
-            <Image source={avatar} style={styles.avatar} resizeMode="cover" />
+            <Image source={userAvatar} style={styles.avatar} resizeMode="cover" />
           </TouchableOpacity>
         </View>
       </View>

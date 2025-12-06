@@ -1,7 +1,8 @@
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { useUser } from '@/context/UserContext';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
+    Alert,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -13,24 +14,35 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Definimos los tipos de navegación
-type RootStackParamList = {
-  login: undefined;
-  register: undefined; // Asumimos que la siguiente pantalla será 'register'
-};
-
 export default function LoginScreen() {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const router = useRouter();
+  const { login } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    console.log('Login attempt:', { email, password });
-    // Aquí iría la lógica de autenticación
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Ingresa tu correo y contraseña');
+      return;
+    }
+
+    try {
+      await login(email, password);
+      router.replace('/(tabs)');
+    } catch (error: any) {
+      console.error(error);
+      let msg = 'Error al iniciar sesión.';
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        msg = 'Correo o contraseña incorrectos.';
+      } else if (error.code === 'auth/invalid-email') {
+        msg = 'El formato del correo no es válido.';
+      }
+      Alert.alert('Error', msg);
+    }
   };
 
   const handleRegister = () => {
-    navigation.navigate('register');
+    router.push('/register');
   };
 
   return (
