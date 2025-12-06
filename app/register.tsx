@@ -4,23 +4,36 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Alert,
-  Image,
-  ImageSourcePropType,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    ImageSourcePropType,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+// Mismo array que en el modal para poder identificar el índice
+const AVATARS = [
+  require('../assets/images/avatar_1.png'),
+  require('../assets/images/avatar_2.png'),
+  require('../assets/images/avatar_3.png'),
+  require('../assets/images/avatar_4.png'),
+  require('../assets/images/avatar_5.png'),
+  require('../assets/images/avatar_6.png'),
+  require('../assets/images/avatar_7.png'),
+  require('../assets/images/avatar_8.png'),
+  require('../assets/images/avatar_9.png'),
+];
+
 export default function RegisterScreen() {
   const router = useRouter();
-  const { setName: setContextName, setAvatar: setContextAvatar } = useUser();
+  const { register } = useUser();
   
   // Estados para los campos
   const [name, setName] = useState('');
@@ -32,7 +45,7 @@ export default function RegisterScreen() {
   const [selectedAvatar, setSelectedAvatar] = useState<ImageSourcePropType>(require('../assets/images/avatar_4.png')); // Avatar por defecto
   const [isAvatarModalVisible, setIsAvatarModalVisible] = useState(false);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     // Validación básica
     if (!name || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Por favor completa todos los campos.');
@@ -44,15 +57,23 @@ export default function RegisterScreen() {
       return;
     }
 
-    // Guardar en contexto
-    setContextName(name);
-    setContextAvatar(selectedAvatar);
+    try {
+      // Identificar el ID del avatar seleccionado
+      const avatarIndex = AVATARS.indexOf(selectedAvatar);
+      // Si no se encuentra (por alguna razón), usamos el default (índice 3 -> avatar_4)
+      const avatarId = avatarIndex !== -1 ? `avatar_${avatarIndex + 1}` : 'avatar_4';
 
-    // Simulación de registro exitoso
-    console.log('Registro exitoso:', { name, email, password, avatar: selectedAvatar });
-    
-    // Navegar a la pantalla de estado emocional
-    router.replace('/emotional-checkin');
+      await register(email, password, name, avatarId);
+      
+      Alert.alert('¡Bienvenido!', 'Tu cuenta ha sido creada con éxito.');
+      router.replace('/emotional-checkin');
+    } catch (error: any) {
+      console.error(error);
+      let msg = 'No se pudo crear la cuenta.';
+      if (error.code === 'auth/email-already-in-use') msg = 'Este correo ya está registrado.';
+      if (error.code === 'auth/weak-password') msg = 'La contraseña debe tener al menos 6 caracteres.';
+      Alert.alert('Error', msg);
+    }
   };
 
   const handleLoginNavigation = () => {

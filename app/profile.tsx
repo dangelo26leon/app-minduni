@@ -17,6 +17,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
+const AVATARS = [
+  require('../assets/images/avatar_1.png'),
+  require('../assets/images/avatar_2.png'),
+  require('../assets/images/avatar_3.png'),
+  require('../assets/images/avatar_4.png'),
+  require('../assets/images/avatar_5.png'),
+  require('../assets/images/avatar_6.png'),
+  require('../assets/images/avatar_7.png'),
+  require('../assets/images/avatar_8.png'),
+  require('../assets/images/avatar_9.png'),
+];
+
 const FIRE_ICON = require('../assets/images/fire.png');
 const BOOK_ICON = require('../assets/images/book.png');
 const MEDITAR_ICON = require('../assets/images/meditar.png');
@@ -27,15 +39,22 @@ const LANGUAGE_ICON = require('../assets/images/language.png');
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { name, avatar, setAvatar } = useUser();
+  const { user, updateUserAvatar } = useUser();
   const [isAvatarModalVisible, setIsAvatarModalVisible] = useState(false);
+
+  const name = user?.name || 'Usuario';
+  const avatar = user?.avatar || require('../assets/images/avatar_4.png');
 
   const handleEditAvatar = () => {
     setIsAvatarModalVisible(true);
   };
 
-  const handleAvatarSelect = (newAvatar: ImageSourcePropType) => {
-    setAvatar(newAvatar);
+  const handleAvatarSelect = async (newAvatar: ImageSourcePropType) => {
+    const avatarIndex = AVATARS.indexOf(newAvatar);
+    if (avatarIndex !== -1) {
+        const avatarId = `avatar_${avatarIndex + 1}`;
+        await updateUserAvatar(avatarId);
+    }
     setIsAvatarModalVisible(false);
   };
 

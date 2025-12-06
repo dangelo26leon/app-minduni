@@ -1,7 +1,9 @@
+import { useJournal } from '@/hooks/useJournal';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
+    ActivityIndicator,
     FlatList,
     Modal,
     StatusBar,
@@ -13,32 +15,15 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-interface JournalEntry {
-  id: string;
-  date: string;
-  text: string;
-  mood: string;
-}
+// Usamos la interfaz del hook
+import { JournalEntry } from '@/hooks/useJournal';
 
 export default function JournalScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   
-  // Estado inicial con datos de ejemplo
-  const [entries, setEntries] = useState<JournalEntry[]>([
-    {
-      id: '1',
-      date: '1 de Diciembre, 2025',
-      text: 'Hoy me sentí un poco abrumado por el examen de cálculo, pero logré terminar la guía de estudio...',
-      mood: '😔',
-    },
-    {
-      id: '2',
-      date: '29 de Octubre, 2025',
-      text: 'No pasó mucho hoy. Fui a clases, comí en la cafetería. Me siento un poco plano.',
-      mood: '😐',
-    },
-  ]);
+  // Usamos el hook personalizado para manejar los datos
+  const { entries, loading, addEntry } = useJournal();
   
   const [modalVisible, setModalVisible] = useState(false);
   const [newEntryText, setNewEntryText] = useState('');
@@ -46,32 +31,18 @@ export default function JournalScreen() {
 
   const MOODS = ['😃', '😌', '😐', '😔', '😠'];
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!newEntryText.trim()) return;
 
-    const dateOptions: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-    // Nota: En un entorno real, asegúrate de que el locale esté configurado correctamente.
-    // Usamos una aproximación manual para el formato si es necesario, pero toLocaleDateString suele funcionar bien.
-    const today = new Date();
-    const day = today.getDate();
-    const month = today.toLocaleString('es-ES', { month: 'long' });
-    const year = today.getFullYear();
-    
-    // Capitalizar mes
-    const monthCapitalized = month.charAt(0).toUpperCase() + month.slice(1);
-    const formattedDate = `${day} de ${monthCapitalized}, ${year}`;
-
-    const newEntry: JournalEntry = {
-      id: Date.now().toString(),
-      date: formattedDate,
-      text: newEntryText,
-      mood: selectedMood,
-    };
-
-    setEntries([newEntry, ...entries]);
-    setNewEntryText('');
-    setSelectedMood('😃');
-    setModalVisible(false);
+    try {
+      await addEntry(newEntryText, selectedMood);
+      setNewEntryText('');
+      setSelectedMood('😃');
+      setModalVisible(false);
+    } catch (error) {
+      console.error("Error al guardar:", error);
+      // Aquí podrías mostrar un Alert si falla
+    }
   };
 
   const renderItem = ({ item }: { item: JournalEntry }) => (
@@ -113,13 +84,23 @@ export default function JournalScreen() {
         <Text style={styles.sectionTitle}>Entradas Anteriores</Text>
 
         {/* Lista de Entradas */}
-        <FlatList
-          data={entries}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
+        {loading ? (
+          <ActivityIndicator size="large" color="#B898CA" style={{ marginTop: 20 }} />
+        ) : (
+          <FlatList
+            data={entries}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <Text style={{ textAlign: 'center', marginTop: 20, color: '#6B7280', fontFamily: 'Rufina-Regular' }}>
+                No hay entradas aún. ¡Escribe la primera!
+              </Text>
+            }
+          />
+        )}
+
       </View>
 
       {/* Modal Nueva Entrada */}
