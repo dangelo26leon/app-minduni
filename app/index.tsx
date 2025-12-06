@@ -1,52 +1,83 @@
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import React, { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+  withTiming
+} from 'react-native-reanimated';
 
-// Definimos los tipos de navegación para esta pantalla
-type RootStackParamList = {
-  Welcome: undefined;
-  login: undefined;
-};
+export default function SplashScreen() {
+  const router = useRouter();
 
-export default function WelcomeScreen() {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  // Valores compartidos para la animación
+  const logoScale = useSharedValue(0.3);
+  const logoOpacity = useSharedValue(0);
+  const textOpacity = useSharedValue(0);
+  const textTranslateY = useSharedValue(20);
+  const containerOpacity = useSharedValue(1); // Nuevo valor para la transición de salida
 
-  const handlePress = () => {
-    navigation.navigate('login' as never);
-  };
+  useEffect(() => {
+    // 1. Animación del Logo (Más lenta y suave)
+    logoOpacity.value = withTiming(1, { duration: 1600 });
+    logoScale.value = withSpring(1, { 
+      damping: 15, 
+      stiffness: 70, // Menor rigidez para ser más lento
+      mass: 1.5 // Mayor masa para sentirlo más pesado/lento
+    });
+    
+    // 2. Animación del Texto (Más demorada y pegada al logo)
+    textOpacity.value = withDelay(1200, withTiming(1, { duration: 1000 }));
+    textTranslateY.value = withDelay(1200, withSpring(0, { damping: 20, stiffness: 80 }));
+
+    // 3. Transición de Salida (Difuminado) y Navegación
+    const timer = setTimeout(() => {
+      // Desvanecer toda la pantalla antes de cambiar
+      containerOpacity.value = withTiming(0, { duration: 800 }, (finished) => {
+        if (finished) {
+          runOnJS(router.replace)('/login');
+        }
+      });
+    }, 4500); // Esperar más tiempo antes de iniciar la salida (4.5s)
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Estilos animados
+  const logoStyle = useAnimatedStyle(() => ({
+    opacity: logoOpacity.value,
+    transform: [{ scale: logoScale.value }]
+  }));
+
+  const textStyle = useAnimatedStyle(() => ({
+    opacity: textOpacity.value,
+    transform: [{ translateY: textTranslateY.value }]
+  }));
+
+  const containerAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: containerOpacity.value
+  }));
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.contentContainer}>
+    <Animated.View style={[styles.container, containerAnimatedStyle]}>
+      <View style={styles.content}>
+        <Animated.Image 
+          source={require('../assets/images/MINDUNI_fondo.png')} 
+          style={[styles.logo, logoStyle]} 
+          resizeMode="contain"
+        />
         
-        {/* Center Content (Logo + Text) */}
-        <View style={styles.centerContent}>
-          <View style={styles.logoContainer}>
-            <Image 
-              source={require('../assets/images/logo.png')} 
-              style={styles.logo} 
-              resizeMode="contain"
-            />
-          </View>
-
-          <View style={styles.textContainer}>
-            <Text style={styles.title}>MINDUNI</Text>
-            <Text style={styles.subtitle}>
-              Tu espacio seguro para sentirte acompañado.
-            </Text>
-          </View>
-        </View>
-
-        {/* Button Section */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={handlePress} activeOpacity={0.8}>
-            <Text style={styles.buttonText}>Comenzar</Text>
-          </TouchableOpacity>
-        </View>
-
+        <Animated.View style={[styles.textContainer, textStyle]}>
+          <Animated.Text style={styles.title}>MINDUNI</Animated.Text>
+          <Animated.Text style={styles.subtitle}>
+            Tu espacio seguro para sentirte acompañado.
+          </Animated.Text>
+        </Animated.View>
       </View>
-    </SafeAreaView>
+    </Animated.View>
   );
 }
 
@@ -54,68 +85,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-  },
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 16,
-  },
-  centerContent: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  logoContainer: {
+  content: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 0,
   },
   logo: {
-    width: 280,
-    height: 280,
+    width: 240,
+    height: 240,
+    marginBottom: 0,
   },
   textContainer: {
     alignItems: 'center',
-    marginTop: -40, // Subimos el texto para acercarlo al logo
+    marginTop: -40, // Subido más para pegar el texto al logo
   },
   title: {
+    fontFamily: 'Rufina-Bold',
     fontSize: 48,
     color: '#B898CA',
-    fontFamily: 'Rufina-Bold',
-    marginBottom: 16,
+    letterSpacing: 2,
+    marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 18,
-    color: '#6B7280',
     fontFamily: 'Rufina-Bold',
-    textAlign: 'center',
-    lineHeight: 26,
-    maxWidth: '80%',
-  },
-  buttonContainer: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  button: {
-    backgroundColor: '#B898CA',
-    width: '100%',
-    height: 56,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  buttonText: {
-    color: '#FFFFFF',
     fontSize: 18,
-    fontFamily: 'Poppins-Bold',
+    color: '#666666',
+    textAlign: 'center',
+    paddingHorizontal: 40,
   },
 });
