@@ -66,7 +66,7 @@ export default function RegisterScreen() {
       await register(email, password, name, avatarId);
       
       Alert.alert('¡Bienvenido!', 'Tu cuenta ha sido creada con éxito.');
-      router.replace('/emotional-checkin');
+      router.replace('/onboarding');
     } catch (error: any) {
       console.error(error);
       let msg = 'No se pudo crear la cuenta.';
