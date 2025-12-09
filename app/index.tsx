@@ -1,17 +1,18 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withSpring,
-  withTiming
+    runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withDelay,
+    withSpring,
+    withTiming
 } from 'react-native-reanimated';
 
 export default function SplashScreen() {
   const router = useRouter();
+  const [isReady, setIsReady] = useState(false);
 
   // Valores compartidos para la animación
   const logoScale = useSharedValue(0.3);
@@ -22,29 +23,36 @@ export default function SplashScreen() {
 
   useEffect(() => {
     // 1. Animación del Logo (Más lenta y suave)
-    logoOpacity.value = withTiming(1, { duration: 1600 });
+    logoOpacity.value = withTiming(1, { duration: 2500 }); // Aumentado a 2.5s
     logoScale.value = withSpring(1, { 
       damping: 15, 
-      stiffness: 70, // Menor rigidez para ser más lento
-      mass: 1.5 // Mayor masa para sentirlo más pesado/lento
+      stiffness: 50, // Menor rigidez para ser más lento
+      mass: 2 // Mayor masa para sentirlo más pesado/lento
     });
     
     // 2. Animación del Texto (Más demorada y pegada al logo)
-    textOpacity.value = withDelay(1200, withTiming(1, { duration: 1000 }));
-    textTranslateY.value = withDelay(1200, withSpring(0, { damping: 20, stiffness: 80 }));
+    textOpacity.value = withDelay(2000, withTiming(1, { duration: 1500 })); // Delay aumentado
+    textTranslateY.value = withDelay(2000, withSpring(0, { damping: 20, stiffness: 80 }));
 
-    // 3. Transición de Salida (Difuminado) y Navegación
+    // Marcar como listo para interacción después de la animación
     const timer = setTimeout(() => {
-      // Desvanecer toda la pantalla antes de cambiar
-      containerOpacity.value = withTiming(0, { duration: 800 }, (finished) => {
-        if (finished) {
-          runOnJS(router.replace)('/login');
-        }
-      });
-    }, 4500); // Esperar más tiempo antes de iniciar la salida (4.5s)
+      setIsReady(true);
+    }, 3500);
 
     return () => clearTimeout(timer);
   }, []);
+
+  const handlePress = () => {
+    // Solo permitir navegar si la animación de entrada ha avanzado lo suficiente
+    // o si el usuario quiere saltarla (opcional, pero aquí esperamos a que termine o casi termine)
+    
+    // Iniciar transición de salida
+    containerOpacity.value = withTiming(0, { duration: 800 }, (finished) => {
+      if (finished) {
+        runOnJS(router.replace)('/login');
+      }
+    });
+  };
 
   // Estilos animados
   const logoStyle = useAnimatedStyle(() => ({
@@ -62,22 +70,24 @@ export default function SplashScreen() {
   }));
 
   return (
-    <Animated.View style={[styles.container, containerAnimatedStyle]}>
-      <View style={styles.content}>
-        <Animated.Image 
-          source={require('../assets/images/MINDUNI_fondo.png')} 
-          style={[styles.logo, logoStyle]} 
-          resizeMode="contain"
-        />
-        
-        <Animated.View style={[styles.textContainer, textStyle]}>
-          <Animated.Text style={styles.title}>MINDUNI</Animated.Text>
-          <Animated.Text style={styles.subtitle}>
-            Tu espacio seguro para sentirte acompañado.
-          </Animated.Text>
-        </Animated.View>
-      </View>
-    </Animated.View>
+    <Pressable style={{ flex: 1 }} onPress={handlePress}>
+      <Animated.View style={[styles.container, containerAnimatedStyle]}>
+        <View style={styles.content}>
+          <Animated.Image 
+            source={require('../assets/images/MINDUNI_fondo.png')} 
+            style={[styles.logo, logoStyle]} 
+            resizeMode="contain"
+          />
+          
+          <Animated.View style={[styles.textContainer, textStyle]}>
+            <Animated.Text style={styles.title}>MINDUNI</Animated.Text>
+            <Animated.Text style={styles.subtitle}>
+              Tu espacio seguro para sentirte acompañado.
+            </Animated.Text>
+          </Animated.View>
+        </View>
+      </Animated.View>
+    </Pressable>
   );
 }
 

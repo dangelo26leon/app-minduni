@@ -1,4 +1,5 @@
 import { useUser } from '@/context/UserContext';
+import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -19,6 +20,7 @@ export default function LoginScreen() {
   const { login } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -70,14 +72,26 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Contraseña"
-                placeholderTextColor="#9CA3AF"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
+              <View style={styles.passwordWrapper}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Contraseña"
+                  placeholderTextColor="#9CA3AF"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!isPasswordVisible}
+                />
+                <TouchableOpacity 
+                  onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                  style={styles.eyeIcon}
+                >
+                  <Feather 
+                    name={isPasswordVisible ? "eye" : "eye-off"} 
+                    size={20} 
+                    color="#9CA3AF" 
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <TouchableOpacity
@@ -93,6 +107,13 @@ export default function LoginScreen() {
               <TouchableOpacity onPress={handleRegister}>
                 <Text style={styles.registerLink}>Registrarme</Text>
               </TouchableOpacity>
+            </View>
+
+            <View style={styles.disclaimerContainer}>
+              <Feather name="info" size={16} color="#4B5563" style={styles.disclaimerIcon} />
+              <Text style={styles.disclaimerText}>
+                MindUni es una herramienta de apoyo emocional. No sustituye la terapia ni el tratamiento psicológico profesional.
+              </Text>
             </View>
           </View>
         </ScrollView>
@@ -143,6 +164,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#374151', // Color del texto ingresado (asumido oscuro para contraste)
   },
+  passwordWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#B898CA',
+    height: 56,
+    paddingHorizontal: 16,
+  },
+  passwordInput: {
+    flex: 1,
+    height: '100%',
+    fontFamily: 'Rufina-Regular',
+    fontSize: 16,
+    color: '#374151',
+  },
+  eyeIcon: {
+    padding: 4,
+  },
   button: {
     backgroundColor: '#B898CA',
     borderRadius: 12,
@@ -180,4 +221,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#B898CA',
   },
+  disclaimerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 30,
+    width: 309,
+  },
+  disclaimerIcon: {
+    marginRight: 8,
+  },
+  disclaimerText: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 11,
+    color: '#4B5563',
+    flex: 1,
+    lineHeight: 14,
+  },
 });
+

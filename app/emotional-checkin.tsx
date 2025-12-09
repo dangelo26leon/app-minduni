@@ -38,13 +38,16 @@ export default function EmotionalCheckinScreen() {
             <TouchableOpacity 
               key={emotion.id} 
               onPress={() => setSelectedEmotion(emotion.id)}
-              style={[
-                styles.emotionButton,
-                selectedEmotion === emotion.id && styles.emotionButtonSelected
-              ]}
+              style={styles.emotionItemContainer}
               activeOpacity={0.7}
             >
-              <Image source={emotion.icon} style={styles.emotionIcon} resizeMode="contain" />
+              <View style={[
+                styles.emotionButton,
+                selectedEmotion === emotion.id && styles.emotionButtonSelected
+              ]}>
+                <Image source={emotion.icon} style={styles.emotionIcon} resizeMode="contain" />
+              </View>
+              <Text style={styles.emotionLabel}>{emotion.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -87,6 +90,15 @@ const styles = StyleSheet.create({
     gap: 20,
     marginBottom: 80,
     width: '100%',
+  },
+  emotionItemContainer: {
+    alignItems: 'center',
+  },
+  emotionLabel: {
+    fontFamily: 'Rufina-Regular',
+    fontSize: 14,
+    color: '#374151',
+    marginTop: 8,
   },
   emotionButton: {
     padding: 10,
