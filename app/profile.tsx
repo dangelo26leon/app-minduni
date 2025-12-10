@@ -4,6 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
+    Alert,
     Dimensions,
     Image,
     ImageSourcePropType,
@@ -39,7 +40,7 @@ const LANGUAGE_ICON = require('../assets/images/language.png');
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, updateUserAvatar } = useUser();
+  const { user, updateUserAvatar, logout } = useUser();
   const [isAvatarModalVisible, setIsAvatarModalVisible] = useState(false);
 
   const name = user?.name || 'Usuario';
@@ -56,6 +57,29 @@ export default function ProfileScreen() {
         await updateUserAvatar(avatarId);
     }
     setIsAvatarModalVisible(false);
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Cerrar sesión",
+      "¿Estás seguro de que quieres salir?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Salir", 
+          style: "destructive", 
+          onPress: async () => {
+            try {
+              await logout();
+              router.replace('/login');
+            } catch (error) {
+              console.error(error);
+              Alert.alert("Error", "No se pudo cerrar sesión.");
+            }
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -148,12 +172,22 @@ export default function ProfileScreen() {
             </TouchableOpacity>
 
             {/* Idioma */}
-            <TouchableOpacity style={[styles.settingItem, { borderBottomWidth: 0 }]} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
               <View style={styles.menuItemLeft}>
                 <Image source={LANGUAGE_ICON} style={styles.menuIcon} resizeMode="contain" />
                 <Text style={styles.menuText}>Idioma</Text>
               </View>
               <Feather name="chevron-right" size={20} color="#000000" />
+            </TouchableOpacity>
+
+            {/* Cerrar Sesión */}
+            <TouchableOpacity style={[styles.settingItem, { borderBottomWidth: 0 }]} onPress={handleLogout} activeOpacity={0.7}>
+              <View style={styles.menuItemLeft}>
+                <View style={[styles.menuIcon, { justifyContent: 'center', alignItems: 'center' }]}>
+                  <Feather name="log-out" size={20} color="#EF4444" />
+                </View>
+                <Text style={[styles.menuText, { color: '#EF4444' }]}>Cerrar sesión</Text>
+              </View>
             </TouchableOpacity>
 
           </View>
